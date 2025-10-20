@@ -1,5 +1,7 @@
 # rosbridge-web-demo (ROS 2 Jazzy)
 
+A minimal ROS 2 Jazzy + rosbridge + roslibjs demo with a Start/Stop custom message.
+
 Minimal demo to:
 - build a custom ROS 2 message `my_msgs/msg/Command`
 - run **rosbridge** (WebSocket gateway) in Docker
@@ -11,14 +13,13 @@ Minimal demo to:
 ```
 rosbridge-web-demo/
 ├─ docker-compose.yml
-├─ Dockerfile            # or .dev/Dockerfile if you prefer
-├─ entrypoint.sh         # loads ROS + overlay in all containers
-├─ index.html            # roslibjs page (uses ws://localhost:9090)
+├─ .dev/
+│  ├─ Dockerfile
+│  └─ entrypoint.sh      # loads ROS + overlay in all containers      
+├─ index.html            # webpage using roslibjs
 └─ src/
-   ├─ my_msgs/
-   │  └─ msg/Command.msg
-   └─ my_controller/
-      └─ scripts/command_listener.py
+   ├─ my_controller/
+   └─ my_msgs/
 ```
 
 ## 1) Start the stack
