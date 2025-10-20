@@ -1,0 +1,39 @@
+services:
+  ros:
+    build:
+      context: .
+      dockerfile: .dev/Dockerfile
+    image: rosbridge-web-demo:stable
+    volumes:
+      - ./:/ws
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    # NOTE: no "ports" here
+
+  rosbridge:
+    image: rosbridge-web-demo:stable
+    depends_on:
+      - ros
+    ports:
+      - "9090:9090"   # only rosbridge maps 9090 to host
+    volumes:
+      - ./:/ws
+    command: >
+      bash -lc "source /opt/ros/jazzy/setup.bash &&
+                [ -f /ws/install/setup.bash ] && source /ws/install/setup.bash || true &&
+                ros2 launch rosbridge_server rosbridge_websocket_launch.xml"
+    restart: unless-stopped
+
+
+  listener:
+    image: rosbridge-web-demo:stable
+    depends_on:
+      - ros
+    container_name: command-listener
+    volumes:
+      - ./:/ws
+    working_dir: /ws
+    command: ros2 run my_controller command_listener
+    restart: unless-stopped
+

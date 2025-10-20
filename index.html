@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Web → ROS 2: Start / Stop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; max-width: 700px; margin: 2rem auto; line-height: 1.4; }
+      .row { display: flex; gap: .5rem; margin: .75rem 0; }
+      button { padding: .6rem 1rem; font-size: 1rem; cursor: pointer; }
+      #status { font-weight: 600; }
+      pre { background: #f6f8fa; padding: .75rem; border-radius: .5rem; min-height: 4rem; }
+      .ok { color: #0a7f2e; } .err { color: #b00020; }
+    </style>
+  </head>
+  <body>
+    <h1>roslibjs → rosbridge (ROS 2 Jazzy)</h1>
+    <p>Status: <span id="status">connecting…</span></p>
+
+    <div class="row">
+      <button id="start">Send START</button>
+      <button id="stop">Send STOP</button>
+    </div>
+
+    <pre id="log"></pre>
+
+    <!-- CDN build of roslibjs -->
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+    <script>
+      const statusEl = document.getElementById('status');
+      const logEl = document.getElementById('log');
+
+      // Connect to rosbridge (ensure container was started with -p 9090:9090)
+      const ros = new ROSLIB.Ros({ url: 'ws://localhost:9090' });
+
+      ros.on('connection', () => { statusEl.textContent = 'connected ✔'; statusEl.className = 'ok'; });
+      ros.on('error', (e) => { statusEl.textContent = 'error: ' + e; statusEl.className = 'err'; });
+      ros.on('close', () => { statusEl.textContent = 'closed'; statusEl.className = ''; });
+
+      // Publisher to your custom topic/type
+      const pub = new ROSLIB.Topic({
+        ros,
+        name: '/my_robot/command',
+        messageType: 'my_msgs/msg/Command'
+      });
+
+      function send(command) {
+        pub.publish(new ROSLIB.Message({ command }));
+        logEl.textContent += `Published command=${command}\n`;
+      }
+
+      document.getElementById('start').onclick = () => send(1); // Command.START
+      document.getElementById('stop').onclick  = () => send(2); // Command.STOP
+    </script>
+
+    <!-- Note: If you serve this page via HTTPS, browsers may block ws://. Use file:// or http:// for testing, or switch to wss:// with TLS. -->
+  </body>
+</html>
